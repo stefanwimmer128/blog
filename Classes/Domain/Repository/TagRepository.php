@@ -55,9 +55,11 @@ class TagRepository extends Repository
             ->getQueryBuilderForTable('tx_blog_domain_model_tag');
         $queryBuilder
             ->select('t.uid', 't.title')
-            ->addSelectLiteral($queryBuilder->expr()->count('mm.uid_foreign', 'cnt'))
+            ->addSelectLiteral($queryBuilder->expr()->count('p.uid', 'cnt'))
             ->from('tx_blog_domain_model_tag', 't')
             ->join('t', 'tx_blog_tag_pages_mm', 'mm', 'mm.uid_foreign = t.uid')
+            ->join('mm', 'pages', 'p', 'p.uid = mm.uid_local')
+            ->andWhere('p.sys_language_uid = ' . \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Context\Context::class)->getAspect('language')->getId())
             ->groupBy('t.title', 't.uid')
             ->orderBy('cnt', 'DESC')
             ->setMaxResults($limit);
@@ -66,7 +68,7 @@ class TagRepository extends Repository
         if ($this->pluginSettings['storagePid']) {
             // force storage pids as integer
             $storagePids = GeneralUtility::intExplode(',', $this->pluginSettings['storagePid']);
-            $queryBuilder->where('t.pid IN(' . implode(',', $storagePids) . ')');
+            $queryBuilder->andWhere('t.pid IN(' . implode(',', $storagePids) . ')');
         }
 
         $result = $queryBuilder
