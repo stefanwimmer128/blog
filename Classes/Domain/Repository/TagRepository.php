@@ -10,6 +10,7 @@ declare(strict_types = 1);
 
 namespace T3G\AgencyPack\Blog\Domain\Repository;
 
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
@@ -59,7 +60,7 @@ class TagRepository extends Repository
             ->from('tx_blog_domain_model_tag', 't')
             ->join('t', 'tx_blog_tag_pages_mm', 'mm', 'mm.uid_foreign = t.uid')
             ->join('mm', 'pages', 'p', 'p.uid = mm.uid_local')
-            ->andWhere('p.sys_language_uid = ' . \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Context\Context::class)->getAspect('language')->getId())
+            ->andWhere('p.sys_language_uid = ' . GeneralUtility::makeInstance(Context::class)->getAspect('language')->getId())
             ->groupBy('t.title', 't.uid')
             ->orderBy('cnt', 'DESC')
             ->setMaxResults($limit);
